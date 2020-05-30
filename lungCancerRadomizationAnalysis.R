@@ -4,6 +4,9 @@
 #install.packages("pastecs")
 library(pastecs)
 library(summarytools)
+library(tidyverse)
+library(psych)
+
 
 
 
@@ -41,6 +44,12 @@ mean(lungCancer$Age)
 mean(lungCancer$Age, na.rm = TRUE)
 median(lungCancer$Age)
 sd(lungCancer$Age)
+
+
+
+object = lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(Age), sd = sd(Age), n = n())
+
+
 
 
 #age outliers
@@ -90,6 +99,9 @@ xx[, 2:5]
 
 chisq.test(xx[, 2:5])
 
+#phi(xx[, 2:5])
+
+
 test <- fisher.test(xx)
 test
 
@@ -97,6 +109,41 @@ by(lungCancer$Treatment, lungCancer$Prior, summary)
 table(lungCancer$Treatment, lungCancer$Prior)
 chisq.test(table(lungCancer$Treatment, lungCancer$Prior))
 
+phi(table(lungCancer$Treatment, lungCancer$Prior))
+
+library(car)
+
+#http://www.sthda.com/english/wiki/f-test-compare-two-variances-in-r
+
+res.ftest <- var.test(Age ~ Treatment, data = lungCancer)
+res.ftest$p.value
+
+bartlett.test(Age ~ Treatment, data=lungCancer)
+leveneTest(Age ~ Treatment, data=lungCancer)
+plot(Age ~ Treatment, data = lungCancer)
 
 
+
+t.test (Age ~ Treatment , var.equal=FALSE, data = lungCancer)
+
+
+
+object = lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), sd = sd(Age, na.rm=TRUE), 
+                                                    median = median(Age, na.rm=TRUE) , min=min(Age, na.rm=TRUE),
+                                                    max=max(Age, na.rm=TRUE),n = n(), non_na_count = sum(!is.na(Age)))
+
+res.ftest <- var.test(KPS ~ Treatment, data = lungCancer)
+res.ftest$p.value
+
+bartlett.test(KPS ~ Treatment, data=lungCancer)
+leveneTest(KPS ~ Treatment, data=lungCancer)
+plot(KPS ~ Treatment, data = lungCancer)
+
+
+
+
+t.test (KPS ~ Treatment , var.equal=FALSE, data = lungCancer)
+
+
+#https://statistics.laerd.com/r-tutorials/independent-samples-t-test-using-r-excel-and-rstudio-3.php
 
