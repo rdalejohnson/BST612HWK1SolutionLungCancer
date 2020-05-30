@@ -69,4 +69,34 @@ sd(lungCancer$Age)
 by(lungCancer, lungCancer$Treatment, summary)
 stat.desc(lungCancer)
 
+############################################
+###### CHI SQUARE ###############
+###########################################
+
+#lungCancer$Cell.Type[lungCancer$Cell.Type==5] <- NA
+#lungCancer2<-lungCancer[(lungCancer$Cell.Type!=5),]
+#lungCancer <- subset(lungCancer,lungCancer$Cell.Type!=5)
+#library(dplyr)
+#
+#lungCancer2 <- filter(lungCancer, lungCancer$Cell.Type!=5)
+
+#lungCancer  <- lungCancer[-118,]
+
+by(lungCancer$Treatment, lungCancer$Cell.Type, summary)
+xx <- table(lungCancer$Treatment, lungCancer$Cell.Type)
+#colnames(xx)
+
+xx[, 2:5]
+
+chisq.test(xx[, 2:5])
+
+test <- fisher.test(xx)
+test
+
+by(lungCancer$Treatment, lungCancer$Prior, summary)
+table(lungCancer$Treatment, lungCancer$Prior)
+chisq.test(table(lungCancer$Treatment, lungCancer$Prior))
+
+
+
 
