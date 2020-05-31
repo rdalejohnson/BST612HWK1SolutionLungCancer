@@ -132,7 +132,7 @@ xx <- table(lungCancer$Treatment, lungCancer$Cell.Type)
 
 xx[, 2:5]
 
-chisq.test(xx[, 2:5])
+chiCellType <- chisq.test(xx[, 2:5])
 
 #
 phi(xx[, 2:5])
@@ -146,7 +146,7 @@ test
 
 by(lungCancer$Treatment, lungCancer$Prior, summary)
 table(lungCancer$Treatment, lungCancer$Prior)
-chisq.test(table(lungCancer$Treatment, lungCancer$Prior))
+chiPriorDx <-chisq.test(table(lungCancer$Treatment, lungCancer$Prior))
 
 phi(table(lungCancer$Treatment, lungCancer$Prior))
 cramersV(table(lungCancer$Treatment, lungCancer$Prior))
@@ -168,7 +168,9 @@ lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), s
                                                     median = median(Age, na.rm=TRUE) , min=min(Age, na.rm=TRUE),
                                                     max=max(Age, na.rm=TRUE),n = n(), non_na_count = sum(!is.na(Age)))
 
-
+shapiro.test(lungCancer$Age)
+qqnorm(lungCancer$Age)
+qqline(lungCancer$Age, col = "red")
 outlierAges <- boxplot(lungCancer$Age, plot=FALSE)$out
 x<-lungCancer
 x<- x[-which(lungCancer$Age %in% outlierAges),]
@@ -177,7 +179,7 @@ res.ftest <- var.test(Age ~ Treatment, data = x)
 res.ftest$p.value
 
 bartlett.test(Age ~ Treatment, data=x)
-lvtest <- leveneTest(Age ~ Treatment, data=x)
+leveneTest(Age ~ Treatment, data=x)
 fligner.test(Age ~ Treatment, data = x)
 plot(Age ~ Treatment, data = x)
 t.test (Age ~ Treatment , var.equal=TRUE, data = x)
@@ -187,6 +189,10 @@ x %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), sd = sd(Ag
 
 
 ################### KPS ********************
+
+shapiro.test(lungCancer$KPS)
+qqnorm(lungCancer$KPS)
+qqline(lungCancer$KPS, col = "red")
 
 res.ftest <- var.test(KPS ~ Treatment, data = lungCancer)
 res.ftest$p.value
