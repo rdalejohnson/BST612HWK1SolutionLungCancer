@@ -6,9 +6,16 @@ library(pastecs)
 library(summarytools)
 library(tidyverse)
 library(psych)
+library(e1071)
+library(lsr)
 
 
-
+# Create the function.
+# https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+getmode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
 
 
 lungCancer = read.csv("Lung_Cancer.csv")
@@ -18,6 +25,34 @@ freq(lungCancer$Treatment)
 freq(lungCancer$Prior)
 freq(lungCancer$Age)
 freq(lungCancer$KPS)
+
+getmode(lungCancer$Age)
+skewness(lungCancer$Age, na.rm = FALSE)
+histo <- hist(lungCancer$Age)
+
+table(cut(lungCancer$Age, breaks=seq(0, 100, 10)))
+
+h = hist(lungCancer$Age) # or hist(x,plot=FALSE) to avoid the plot of the histogram
+h$density = h$counts/sum(h$counts)*100
+plot(h,freq=FALSE)
+
+
+
+h = hist(lungCancer$KPS) # or hist(x,plot=FALSE) to avoid the plot of the histogram
+h$density = h$counts/sum(h$counts)*100
+plot(h,freq=FALSE)
+
+table(cut(lungCancer$KPS, breaks=seq(0, 100, 10)))
+skewness(lungCancer$KPS, na.rm = FALSE)
+
+
+
+
+# xxx <- table(   subset(lungCancer,lungCancer$Age > 2)$Age)
+# 
+# cbind(xxx,prop.table(xxx))
+
+
 
 head(lungCancer)
 
@@ -99,7 +134,11 @@ xx[, 2:5]
 
 chisq.test(xx[, 2:5])
 
-#phi(xx[, 2:5])
+#
+phi(xx[, 2:5])
+
+cramersV(xx[,2:5])
+
 
 
 test <- fisher.test(xx)
@@ -110,6 +149,8 @@ table(lungCancer$Treatment, lungCancer$Prior)
 chisq.test(table(lungCancer$Treatment, lungCancer$Prior))
 
 phi(table(lungCancer$Treatment, lungCancer$Prior))
+cramersV(table(lungCancer$Treatment, lungCancer$Prior))
+
 
 library(car)
 
@@ -119,30 +160,50 @@ res.ftest <- var.test(Age ~ Treatment, data = lungCancer)
 res.ftest$p.value
 
 bartlett.test(Age ~ Treatment, data=lungCancer)
-leveneTest(Age ~ Treatment, data=lungCancer)
+lvtest <- leveneTest(Age ~ Treatment, data=lungCancer)
+fligner.test(Age ~ Treatment, data = lungCancer)
 plot(Age ~ Treatment, data = lungCancer)
-
-
-
 t.test (Age ~ Treatment , var.equal=FALSE, data = lungCancer)
-
-
-
-object = lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), sd = sd(Age, na.rm=TRUE), 
+lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), sd = sd(Age, na.rm=TRUE), 
                                                     median = median(Age, na.rm=TRUE) , min=min(Age, na.rm=TRUE),
                                                     max=max(Age, na.rm=TRUE),n = n(), non_na_count = sum(!is.na(Age)))
+
+
+outlierAges <- boxplot(lungCancer$Age, plot=FALSE)$out
+x<-lungCancer
+x<- x[-which(lungCancer$Age %in% outlierAges),]
+
+res.ftest <- var.test(Age ~ Treatment, data = x)
+res.ftest$p.value
+
+bartlett.test(Age ~ Treatment, data=x)
+lvtest <- leveneTest(Age ~ Treatment, data=x)
+fligner.test(Age ~ Treatment, data = x)
+plot(Age ~ Treatment, data = x)
+t.test (Age ~ Treatment , var.equal=TRUE, data = x)
+x %>% group_by(Treatment) %>% summarise(mean = mean(Age, na.rm=TRUE), sd = sd(Age, na.rm=TRUE), 
+                                                 median = median(Age, na.rm=TRUE) , min=min(Age, na.rm=TRUE),
+                                                 max=max(Age, na.rm=TRUE),n = n(), non_na_count = sum(!is.na(Age)))
+
+
+################### KPS ********************
 
 res.ftest <- var.test(KPS ~ Treatment, data = lungCancer)
 res.ftest$p.value
 
 bartlett.test(KPS ~ Treatment, data=lungCancer)
 leveneTest(KPS ~ Treatment, data=lungCancer)
-plot(KPS ~ Treatment, data = lungCancer)
+fligner.test(KPS ~ Treatment, data = lungCancer)
+
+#plot(KPS ~ Treatment, data = lungCancer)
+
+t.test (KPS ~ Treatment , var.equal=TRUE, data = lungCancer)
 
 
+kpsss <- lungCancer %>% group_by(Treatment) %>% summarise(mean = mean(KPS, na.rm=TRUE), sd = sd(KPS, na.rm=TRUE), 
+                                                 median = median(KPS, na.rm=TRUE) , min=min(KPS, na.rm=TRUE),
+                                                 max=max(KPS, na.rm=TRUE),n = n(), non_na_count = sum(!is.na(KPS)))
 
-
-t.test (KPS ~ Treatment , var.equal=FALSE, data = lungCancer)
 
 
 #https://statistics.laerd.com/r-tutorials/independent-samples-t-test-using-r-excel-and-rstudio-3.php
