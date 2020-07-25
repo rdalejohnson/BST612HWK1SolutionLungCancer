@@ -130,9 +130,12 @@ by(lungCancer$Treatment, lungCancer$Cell.Type, summary)
 xx <- table(lungCancer$Treatment, lungCancer$Cell.Type)
 #colnames(xx)
 
-xx[, 2:5]
+xx[, 2:5]  #skipping column 1 since that is the invalid values
 
 chiCellType <- chisq.test(xx[, 2:5])
+chiCellType
+
+
 
 #
 phi(xx[, 2:5])
